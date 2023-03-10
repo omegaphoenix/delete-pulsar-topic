@@ -1,0 +1,9 @@
+[pulsar]
+hostname = ""
+tenant = ""
+namespace = ""
+token = ""
+topics = [
+  "",
+  "",
+]
