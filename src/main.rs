@@ -1,6 +1,6 @@
 mod config;
 use reqwest::header::{HeaderMap, HeaderValue};
-use reqwest::Client;
+use reqwest::{Client, StatusCode};
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize)]
@@ -42,13 +42,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     headers.insert("Authorization", format!("Bearer {}", &token).parse()?);
 
-    let hostname = format!("https://{}", hostname);
-    let path_prefix = format!("/admin/v2/persistent/{}/{}", tenant, namespace);
+    let hostname = format!("https://{hostname}");
+    let path_prefix = format!("/admin/v2/persistent/{tenant}/{namespace}");
 
     for topic in topics {
-        let uri = format!("{}{}/{}?force=true", hostname, path_prefix, topic);
+        let uri = format!("{hostname}{path_prefix}/{topic}?force=true");
         let response = client.delete(uri).headers(headers.clone()).send().await?;
-        println!("Status: {:?} {} {}", response.status(), namespace, topic);
+        let status = response.status();
+        println!("Status: {status:?} {namespace} {topic}");
+
+        match status {
+            StatusCode::NO_CONTENT => {
+                println!("Successfully deleted")
+            }
+            StatusCode::UNAUTHORIZED => {
+                println!("Unauthorized: Is your token valid? See README for hints.")
+            }
+            StatusCode::FORBIDDEN => println!("Forbidden: Is your token an admin token?"),
+            _ => {
+                println!("Undocumented status code")
+            }
+        }
     }
 
     Ok(())

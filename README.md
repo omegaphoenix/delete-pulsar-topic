@@ -19,4 +19,10 @@ Delete pulsar topics
 
 ## Error(s)
 - `Status: 401 [namespace] [topic]`
-- Unauthorized - Is your token an admin token and is it expired?
+- Unauthorized
+  - Is your token an admin token?
+  - Is your token expired? Tokens expire after 7 days.
+  - Did you generate your token for the right host? You need to select the correct instance before generating the token.
+
+- `Status: 403 [namespace] [topic]`
+- Forbidden - Your token is valid but is not an admin token
