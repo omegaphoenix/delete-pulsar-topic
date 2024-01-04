@@ -50,18 +50,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let response = client.delete(uri).headers(headers.clone()).send().await?;
         let status = response.status();
         println!("Status: {status:?} {namespace} {topic}");
-
         match status {
-            StatusCode::NO_CONTENT => {
-                println!("Successfully deleted")
-            }
+            StatusCode::NO_CONTENT => println!("Successfully deleted {}/{}", namespace, topic),
             StatusCode::UNAUTHORIZED => {
-                println!("Unauthorized: Is your token valid? See README for hints.")
+                println!("Unauthorized - Is your token an admin token? Is it expired? Streamnative Cloud tokens expire after 7 days.")
             }
             StatusCode::FORBIDDEN => println!("Forbidden: Is your token an admin token?"),
-            _ => {
-                println!("Undocumented status code")
-            }
+            _ => println!(
+                "Unexpected status code - please ask for help so we can document this error"
+            ),
         }
     }
 
