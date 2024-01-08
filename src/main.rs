@@ -53,7 +53,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         match status {
             StatusCode::NO_CONTENT => println!("Successfully deleted {}/{}", namespace, topic),
             StatusCode::UNAUTHORIZED => {
-                println!("Unauthorized - Is your token an admin token? Is it expired? Streamnative Cloud tokens expire after 7 days.")
+                println!(
+                    "Unauthorized
+                - Is your token an admin token?
+                - Is it a new token? Streamnative Cloud tokens expire after 7 days.
+                - Did you select the correct Pulsar cluster before generating your token?"
+                )
             }
             StatusCode::FORBIDDEN => println!("Forbidden: Is your token an admin token?"),
             _ => println!(

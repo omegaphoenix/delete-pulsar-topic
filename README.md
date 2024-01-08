@@ -4,7 +4,17 @@ Delete pulsar topics
 ## Setup
 
 ### Prerequisite
-[Install Rust](https://www.rust-lang.org/tools/install) `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+- [Install Rust](https://www.rust-lang.org/tools/install) `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+- Fetch an admin token from the cloud UI:
+    - Sign in to [Streamnative Cloud](https://auth.streamnative.cloud/u/login/identifier) using your Google account
+    - Select the organization
+    - Change your host/cluster to the one that you want to delete from.
+        - The tenant/namespace does not matter since tokens are generated per service account and cluster/host.
+    - Click on Service Accounts:
+        - Select any admin service account and click on `Generate new token`
+        - Copy the token and paste it in your local `config.toml`
+        - Note that these tokens expire after 7 days
+
 
 ### To Run
 - `cp config.sample.toml config.toml`
