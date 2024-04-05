@@ -44,29 +44,35 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let hostname = format!("https://{hostname}");
     let path_prefix = format!("/admin/v2/persistent/{tenant}/{namespace}");
+    let query_string = "?force=true";
 
     for topic in topics {
         let topic_uri = format!("{hostname}{path_prefix}/{topic}");
-        let query_string = "?force=true";
-        let uri = format!("{topic_uri}{query_string}");
-        println!("{uri}");
-        let response = client.delete(uri).headers(headers.clone()).send().await?;
-        let mut status = response.status();
+        let delete_partitioned_uri = format!("{topic_uri}/partitions{query_string}");
+        let mut status = delete(&client, delete_partitioned_uri, headers.clone()).await?;
 
         if matches!(status, StatusCode::NOT_FOUND) {
-            let partitioned_uri = format!("{topic_uri}/partitions{query_string}");
-            println!("404 when hitting non-partitioned delete route. Trying partitioned route now: {partitioned_uri}");
-            let response = client
-                .delete(partitioned_uri)
-                .headers(headers.clone())
-                .send()
-                .await?;
-            status = response.status();
+            let delete_non_partitioned_uri = format!("{topic_uri}{query_string}");
+            log::warn!(
+                "404 when hitting partitioned delete route. Trying non-partitioned route now."
+            );
+            status = delete(&client, delete_non_partitioned_uri, headers.clone()).await?;
         }
+
         handle_status(status, &namespace, &topic);
     }
 
     Ok(())
+}
+
+async fn delete(
+    client: &Client,
+    uri: String,
+    headers: HeaderMap,
+) -> Result<StatusCode, Box<dyn std::error::Error>> {
+    log::info!("{uri}");
+    let response = client.delete(uri).headers(headers.clone()).send().await?;
+    Ok(response.status())
 }
 
 fn handle_status(status: StatusCode, namespace: &str, topic: &str) {
