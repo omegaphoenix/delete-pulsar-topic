@@ -36,3 +36,7 @@ Delete pulsar topics
 
 - `Status: 403 [namespace] [topic]`
 - Forbidden - Your token is valid but is not an admin token
+
+- `Status: 404 [namespace] [topic]`
+- Past error - Topic may be partitioned and we are hitting the non-partitioned route or vice versa. This should be fixed now.
+- Not Found - Topic was not found.
