@@ -2,8 +2,13 @@
 hostname = ""
 tenant = ""
 namespace = ""
-token = ""
 topics = [
   "",
-  "",
 ]
+
+[pulsar.oauth]
+client_id = ""
+client_secret = ""
+client_email = ""
+issuer_url = ""
+audience = ""

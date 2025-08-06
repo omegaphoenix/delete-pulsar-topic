@@ -1,3 +1,4 @@
+mod auth;
 mod config;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{Client, StatusCode};
@@ -15,7 +16,7 @@ pub struct PulsarConfig {
     pub tenant: String,
     pub namespace: String,
     pub topics: Vec<String>,
-    pub token: String,
+    pub oauth: auth::OAuth,
 }
 
 #[tokio::main]
@@ -29,10 +30,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 tenant,
                 namespace,
                 topics,
-                token,
+                oauth,
             },
     } = config::load().expect("Unable to load config");
     let client = Client::new();
+
+    // Get OAuth token
+    let token = auth::get_auth_token(&client, oauth).await?;
 
     // Create a new header map
     let mut headers = HeaderMap::new();
@@ -82,12 +86,12 @@ fn handle_status(status: StatusCode, namespace: &str, topic: &str) {
         StatusCode::UNAUTHORIZED => {
             println!(
                 "Unauthorized
-                - Is your token an admin token?
-                - Is it a new token? Streamnative Cloud tokens expire after 7 days.
-                - Did you select the correct Pulsar cluster before generating your token?"
+                - Are your OAuth credentials correct?
+                - Does your service account have admin permissions?
+                - Check your client_id, client_secret, and audience configuration."
             )
         }
-        StatusCode::FORBIDDEN => println!("Forbidden: Is your token an admin token?"),
+        StatusCode::FORBIDDEN => println!("Forbidden: Does your service account have admin permissions?"),
         StatusCode::NOT_FOUND => println!("Not found: Topic was not found."),
         _ => println!("Unexpected status code - please ask for help so we can document this error"),
     }
